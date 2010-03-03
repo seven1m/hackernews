@@ -10,16 +10,16 @@ This is a fairly simple Ruby class for accessing certain parts of Hacker News (h
 
 * Handles Hacker News session cookie and login.
 * Can retreive user page, along with karma and average karma values.
+* Can vote on posts and comments.
+* Can comment on posts and other comments.
 
 == To Do
 
-* Add ability to vote.
 * Add ability to post news.
-* Add ability to post comments.
 
 == Source Code
 
-    http://github.com/seven1m/hackernews
+http://github.com/seven1m/hackernews
 
 == Installation
 
@@ -32,6 +32,8 @@ This is a fairly simple Ruby class for accessing certain parts of Hacker News (h
     hn = HackerNews.new(USERNAME, PASSWORD)
     hn.karma # => '62'
     hn.average_karma # => '1.87'
+    hn.vote(123)
+    hn.comment(123, 'my comment')
     
 == Feedback
 
