@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name         = "hackernews"
-  s.version      = "0.1.0"
+  s.version      = "0.2.0"
   s.author       = "Tim Morgan"
   s.email        = "tim@timmorgan.org"
   s.homepage     = "http://rdoc.info/projects/seven1m/hackernews"

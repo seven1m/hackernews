@@ -4,7 +4,7 @@ require 'open-uri'
 
 class HackerNews
 
-  VERSION = '0.1.0'
+  VERSION = '0.2.0'
 
   # Returns the version string for the library.
   def self.version
