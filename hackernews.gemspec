@@ -1,6 +1,8 @@
+require File.dirname(__FILE__) + '/lib/hackernews'
+
 Gem::Specification.new do |s|
   s.name         = "hackernews"
-  s.version      = "0.2.0"
+  s.version      = HackerNews::VERSION
   s.author       = "Tim Morgan"
   s.email        = "tim@timmorgan.org"
   s.homepage     = "http://rdoc.info/projects/seven1m/hackernews"
