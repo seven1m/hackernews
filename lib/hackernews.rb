@@ -11,27 +11,25 @@ class HackerNews
     VERSION
   end
 
-  BASE_URL = 'http://news.ycombinator.com'
-  USER_URL = 'http://news.ycombinator.com/user?id=%s'
+  BASE_URL           = "http://news.ycombinator.com"
+  ITEM_URL           = "#{BASE_URL}/item?id=%s"
+  USER_URL           = "#{BASE_URL}/user?id=%s"
+  LOGIN_SUBMIT_URL   = "#{BASE_URL}/y"
+  
+  class LoginError < RuntimeError; end
   
   # Creates a new HackerNews object.
   # Specify your username and password.
   def initialize(username, password)
-    login_url = open(BASE_URL).read.match(/href="([^"]+)">login<\/a>/)[1]
-    form_html = open(BASE_URL + login_url).read
-    submit_url = URI.parse(BASE_URL)
-    response = Net::HTTP.new(submit_url.host, submit_url.port).start do |http|
-      req = Net::HTTP::Post.new('/y')
-      req.set_form_data(
-        'fnid' => form_html.match(/<input type=hidden name="fnid" value="([^"]+)"/)[1],
-        'u'    => username,
-        'p'    => password
-      )
-      http.request(req)
-    end
-    @cookie = response.header['set-cookie']
+    login_url = get(BASE_URL).match(/href="([^"]+)">login<\/a>/)[1]
+    form_html = get(BASE_URL + login_url)
+    fnid = form_html.match(/<input type=hidden name="fnid" value="([^"]+)"/)[1]
+    response = post(LOGIN_SUBMIT_URL, 'fnid' => fnid, 'u' => username, 'p' => password)
     @username = username
     @password = password
+    unless @cookie = response.header['set-cookie']
+      raise LoginError, "Login credentials did not work."
+    end
   end
   
   # Retrieves the karma for the logged in user, or for the specified username (if given).
@@ -49,13 +47,41 @@ class HackerNews
     username ||= @username
     @user_pages ||= {}
     @user_pages[username] ||= begin
-      url = URI.parse(USER_URL % username)
+      get(USER_URL % username)
+    end
+  end
+  
+  private
+  
+    def url_path_and_query(url)
+      if url.path and url.query
+        "#{url.path}?#{url.query}"
+      elsif url.path.to_s.any?
+        url.path
+      else
+        '/'
+      end
+    end
+  
+    def get(url)
+      url = URI.parse(url)
       response = Net::HTTP.start(url.host, url.port) do |http|
-        header = {'Cookie' => @cookie}
-        http.get(url.path + '?' + url.query, header)
+        http.get(url_path_and_query(url), build_header)
       end
       response.body
     end
-  end
+    
+    def post(url, data)
+      url = URI.parse(url)
+      Net::HTTP.new(url.host, url.port).start do |http|
+        req = Net::HTTP::Post.new(url.path, build_header)
+        req.set_form_data(data)
+        http.request(req)
+      end
+    end
+    
+    def build_header
+      @cookie && {'Cookie' => @cookie}
+    end
 
 end

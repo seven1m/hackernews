@@ -12,8 +12,14 @@ class HackerNewsTest < Test::Unit::TestCase
     end
   end
 
-  def test_login
+  def test_session_cookie
     assert @hn.instance_eval('@cookie') =~ /user=[a-z0-9]+;/i
+  end
+  
+  def test_login_failure
+    assert_raise HackerNews::LoginError do
+      HackerNews.new('foobar00000', 'baz')
+    end
   end
   
   def test_karma
