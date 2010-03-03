@@ -15,6 +15,7 @@ class HackerNews
   ITEM_URL           = "#{BASE_URL}/item?id=%s"
   USER_URL           = "#{BASE_URL}/user?id=%s"
   LOGIN_SUBMIT_URL   = "#{BASE_URL}/y"
+  COMMENT_SUBMIT_URL = "#{BASE_URL}/r"
   
   class LoginError < RuntimeError; end
   
@@ -49,6 +50,18 @@ class HackerNews
     @user_pages[username] ||= begin
       get(USER_URL % username)
     end
+  end
+  
+  # Up-vote on a post or on a comment by passing in the id number.
+  def vote(id)
+    url = get(ITEM_URL % id).match(/<a id=up_\d+ onclick="return vote\(this\)" href="(vote\?[^"]+)">/)[1]
+    get(BASE_URL + '/' + url)
+  end
+  
+  # Post a comment on a posted item or on another comment.
+  def comment(id, text)
+    fnid = get(ITEM_URL % id).match(/<input type=hidden name="fnid" value="([^"]+)"/)[1]
+    post(COMMENT_SUBMIT_URL, 'fnid' => fnid, 'text' => text)
   end
   
   private
