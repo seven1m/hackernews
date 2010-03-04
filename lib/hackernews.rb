@@ -20,18 +20,21 @@ class HackerNews
   class LoginError < RuntimeError; end
   
   # Creates a new HackerNews object.
-  # Specify your username and password.
-  def initialize(username = nil, password = nil)
-    unless username.nil?
-      login_url = get(BASE_URL).match(/href="([^"]+)">login<\/a>/)[1]
-      form_html = get(BASE_URL + login_url)
-      fnid = form_html.match(/<input type=hidden name="fnid" value="([^"]+)"/)[1]
-      response = post(LOGIN_SUBMIT_URL, 'fnid' => fnid, 'u' => username, 'p' => password)
-      @username = username
-      @password = password
-      unless @cookie = response.header['set-cookie']
-        raise LoginError, "Login credentials did not work."
-      end
+  # If username and password are provided, login is called.
+  def initialize(username=nil, password=nil)
+    login(username, password) if username and password
+  end
+  
+  # Log into Hacker News with the specified username and password.
+  def login(username, password)
+    login_url = get(BASE_URL).match(/href="([^"]+)">login<\/a>/)[1]
+    form_html = get(BASE_URL + login_url)
+    fnid = form_html.match(/<input type=hidden name="fnid" value="([^"]+)"/)[1]
+    response = post(LOGIN_SUBMIT_URL, 'fnid' => fnid, 'u' => username, 'p' => password)
+    @username = username
+    @password = password
+    unless @cookie = response.header['set-cookie']
+      raise LoginError, "Login credentials did not work."
     end
   end
   
