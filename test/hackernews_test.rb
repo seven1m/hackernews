@@ -27,11 +27,16 @@ class HackerNewsTest < Test::Unit::TestCase
   end
   
   def test_karma
-    assert @hn.karma.to_s != ''
     assert @hn.karma('pg').to_i > 59000
+    login
+    assert @hn.karma.to_s != ''
   end
   
   def test_average_karma
+    assert_raise HackerNews::LoginError do
+      @hn.average_karma
+    end
+    login
     assert @hn.average_karma.to_s != ''
   end
 

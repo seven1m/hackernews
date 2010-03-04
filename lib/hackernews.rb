@@ -43,8 +43,9 @@ class HackerNews
     user_page(username).match(/<td valign=top>karma\:<\/td><td>(\d+)<\/td>/)[1]
   end
   
-  # Retrieves the average karma per post for the logged in user.
+  # Retrieves the average karma per post for the logged in user (must be logged in).
   def average_karma
+    require_login!
     user_page.match(/<td valign=top>avg:<\/td><td>([\d\.]+)<\/td>/)[1]
   end
   
@@ -105,7 +106,7 @@ class HackerNews
     end
     
     def require_login!
-      raise(LoginError, "Login credentials did not work.") unless @cookie
+      raise(LoginError, "You must log in to perform this action.") unless @cookie
     end
 
 end
