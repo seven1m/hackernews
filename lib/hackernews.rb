@@ -21,15 +21,17 @@ class HackerNews
   
   # Creates a new HackerNews object.
   # Specify your username and password.
-  def initialize(username, password)
-    login_url = get(BASE_URL).match(/href="([^"]+)">login<\/a>/)[1]
-    form_html = get(BASE_URL + login_url)
-    fnid = form_html.match(/<input type=hidden name="fnid" value="([^"]+)"/)[1]
-    response = post(LOGIN_SUBMIT_URL, 'fnid' => fnid, 'u' => username, 'p' => password)
-    @username = username
-    @password = password
-    unless @cookie = response.header['set-cookie']
-      raise LoginError, "Login credentials did not work."
+  def initialize(username = nil, password = nil)
+    unless username.nil?
+      login_url = get(BASE_URL).match(/href="([^"]+)">login<\/a>/)[1]
+      form_html = get(BASE_URL + login_url)
+      fnid = form_html.match(/<input type=hidden name="fnid" value="([^"]+)"/)[1]
+      response = post(LOGIN_SUBMIT_URL, 'fnid' => fnid, 'u' => username, 'p' => password)
+      @username = username
+      @password = password
+      unless @cookie = response.header['set-cookie']
+        raise LoginError, "Login credentials did not work."
+      end
     end
   end
   
@@ -54,12 +56,14 @@ class HackerNews
   
   # Up-vote on a post or on a comment by passing in the id number.
   def vote(id)
+    require_login!
     url = get(ITEM_URL % id).match(/<a id=up_\d+ onclick="return vote\(this\)" href="(vote\?[^"]+)">/)[1]
     get(BASE_URL + '/' + url)
   end
   
   # Post a comment on a posted item or on another comment.
   def comment(id, text)
+    require_login!
     fnid = get(ITEM_URL % id).match(/<input type=hidden name="fnid" value="([^"]+)"/)[1]
     post(COMMENT_SUBMIT_URL, 'fnid' => fnid, 'text' => text)
   end
@@ -95,6 +99,10 @@ class HackerNews
     
     def build_header
       @cookie && {'Cookie' => @cookie}
+    end
+    
+    def require_login!
+      raise(LoginError, "Login credentials did not work.") unless @cookie
     end
 
 end
