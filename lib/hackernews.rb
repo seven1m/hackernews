@@ -54,7 +54,7 @@ class HackerNews
     end
   end
   
-  # Up-vote on a post or on a comment by passing in the id number.
+  # Up-vote a post or a comment by passing in the id number.
   def vote(id)
     require_login!
     url = get(ITEM_URL % id).match(/<a id=up_\d+ onclick="return vote\(this\)" href="(vote\?[^"]+)">/)[1]
