@@ -34,6 +34,9 @@ http://github.com/seven1m/hackernews
     hn.average_karma # => '1.87'
     hn.vote(123)
     hn.comment(123, 'my comment')
+
+    require 'pp'    
+    pp hn.parse_story_comments(1)
     
 == Feedback
 

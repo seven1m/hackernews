@@ -40,4 +40,14 @@ class HackerNewsTest < Test::Unit::TestCase
     assert @hn.average_karma.to_s != ''
   end
 
+  # This test is likely to break as often as pg changes the layout.
+  # It's a good layout so hopefully it will not break frequently.
+  # It will also break if jacquesm decides to delete his witty comment.
+  def test_parse_story_comments
+    parsed_comments = @hn.parse_story_comments(1)
+    jacquesm = parsed_comments.find{|c| c[:user_id] == 'jacquesm'}
+    assert_not_nil(jacquesm)
+    assert_match(/longest span between article and comment/, jacquesm[:text])
+  end
+
 end

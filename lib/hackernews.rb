@@ -72,6 +72,39 @@ class HackerNews
     post(COMMENT_SUBMIT_URL, 'fnid' => fnid, 'text' => text)
   end
   
+  # Parse the comment tree for a story. 
+  # I used regex so as to not impose library requirements on a library that
+  # is not my own.
+  #
+  # Returns an array of hashes.
+  # E.G for ret-val. [{:id=>1, :poster=>:chasing_sparks, :text=>'.', :children=>[]}]
+  def parse_story_comments(id)
+    source = get(BASE_URL + "/item?id=#{id}")
+
+    # The following line is ugly and will break.
+    comments = source.scan(/<img src="http:\/\/ycombinator.com\/images\/s.gif" height=1 width=(\d+)><\/td>.*?<span class="comhead"><span id=score_([0-9]+)>([0-9]+) points?<\/span> by <a href="user\?id=([^"]+)">\4<\/a>([^\|]+)\| *<a href="item\?id=[0-9]+">link<\/a><\/span><\/div><br>\n?<span class=\"comment\"><font color=#000000>(.*?)<\/font><\/span><p><font size=1><font color=#f6f6ef/im)
+    
+    commenter_stack = []
+    comments.collect! do |comment| 
+      comment_hash = {
+        :indentation => comment[0].to_i,
+        :id          => comment[1], 
+        :points      => comment[2], 
+        :user_id     => comment[3], 
+        :post_date   => comment[4].lstrip.rstrip,:text=>comment[5],
+        :children    => []
+      }
+      
+      commenter_stack.pop until commenter_stack.empty? || commenter_stack.last[:indentation] < comment_hash[:indentation]
+      commenter_stack.last[:children].push(comment_hash) if commenter_stack.length > 0
+      commenter_stack.push(comment_hash)
+
+      (commenter_stack.size == 1) ? comment_hash : nil
+    end
+
+    comments.compact
+  end
+  
   private
   
     def url_path_and_query(url)
