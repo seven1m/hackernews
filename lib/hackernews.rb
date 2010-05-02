@@ -81,9 +81,17 @@ class HackerNews
   def parse_story_comments(id)
     source = get(BASE_URL + "/item?id=#{id}")
 
-    # The following line is ugly and will break.
-    comments = source.scan(/<img src="http:\/\/ycombinator.com\/images\/s.gif" height=1 width=(\d+)><\/td>.*?<span class="comhead"><span id=score_([0-9]+)>([0-9]+) points?<\/span> by <a href="user\?id=([^"]+)">\4<\/a>([^\|]+)\| *<a href="item\?id=[0-9]+">link<\/a><\/span><\/div><br>\n?<span class=\"comment\"><font color=#000000>(.*?)<\/font><\/span><p><font size=1><font color=#f6f6ef/im)
-    
+    # The following regexp will break
+    indentation  = '<img src="http:\/\/ycombinator.com\/images\/s.gif" height=1 width=(\d+)><\/td>'
+    score        = '<span id=score_([0-9]+)>([0-9]+) point'
+    user_id      = '<a href="user\\?id=([^"]+)">'
+    time_ago     = '<\/a>([^\|]+)\|'
+    comment_body = '<span class=\\"comment\\"><font color=#000000>(.*?)<\\/font>'    
+    regexp_str  = "#{indentation}.*?#{score}.*?#{user_id}.*?#{time_ago}.*?#{comment_body}"
+
+    comment_regexp = Regexp.new(regexp_str, Regexp::MULTILINE)
+    comments = source.scan(comment_regexp)
+
     commenter_stack = []
     comments.collect! do |comment| 
       comment_hash = {

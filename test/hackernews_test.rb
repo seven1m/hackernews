@@ -44,8 +44,13 @@ class HackerNewsTest < Test::Unit::TestCase
   # It's a good layout so hopefully it will not break frequently.
   # It will also break if jacquesm decides to delete his witty comment.
   def test_parse_story_comments
+    parsed_comments = @hn.parse_story_comments(1220079)
+    chasingsparks= parsed_comments.find{|c| c[:user_id] == 'chasingsparks'}
+    assert_not_nil(chasingsparks)
+    
     parsed_comments = @hn.parse_story_comments(1)
     jacquesm = parsed_comments.find{|c| c[:user_id] == 'jacquesm'}
+    puts jacquesm.inspect
     assert_not_nil(jacquesm)
     assert_match(/longest span between article and comment/, jacquesm[:text])
   end
